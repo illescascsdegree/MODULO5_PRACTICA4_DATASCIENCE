@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Datos que venden</title>
+<style>
+/* Layout: una historia por scroll — cada sección es una "slide" a pantalla completa en escritorio,
+   bandas de color alternas (menta, blanco, crema, verde casa) como el sitio de referencia, botones píldora. */
+:root {
+  color-scheme: light;
+  --house: #1E3932;      /* verde casa: bandas oscuras y texto principal */
+  --green: #006241;      /* verde de marca: titulares */
+  --accent: #00754A;     /* verde acción: botones, datos destacados */
+  --mint: #D4E9E2;       /* banda clara del hero */
+  --cream: #F2F0EB;      /* banda neutra */
+  --gold: #CBA258;       /* detalle dorado: "mejor oferta", manga del vaso */
+  --white: #FFFFFF;
+  --ink: #1F1F1F;
+  --muted: #5B5B57;
+  --line: #DAD7CF;
+  --deep: #2A4A41;       /* superficies sobre verde casa */
+  --on-dark: #E7EFEB;
+  --on-dark-muted: #B7CBC3;
+
+  --font: "SoDo Sans", "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --h1: clamp(2.8rem, 6.4vw, 5.4rem);
+  --h2: clamp(2rem, 4.2vw, 3.4rem);
+  --num: clamp(2.8rem, 6.5vw, 5.6rem);
+  --lead: clamp(1.08rem, 1.6vw, 1.35rem);
+  --header-h: 64px;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+html { scroll-behavior: smooth; }
+body { background: var(--white); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--white); }
+* { box-sizing: border-box; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.015em; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Header ---------- */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50;
+  background: var(--white);
+  box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 2px 2px rgba(0,0,0,.06), 0 0 2px rgba(0,0,0,.07);
+}
+.top-in {
+  max-width: 1280px; margin: 0 auto; height: var(--header-h);
+  display: flex; align-items: center; gap: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; color: var(--house); letter-spacing: -0.01em; white-space: nowrap; }
+.brand-mark { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; color: var(--white); flex: none; }
+.brand-mark svg { width: 22px; height: 22px; }
+.nav { display: flex; gap: 22px; font-size: 14px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.nav a { text-decoration: none; color: var(--ink); padding: 6px 0; border-bottom: 2px solid transparent; }
+.nav a[aria-current="true"] { border-bottom-color: var(--accent); color: var(--accent); }
+.top-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.hint { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.hint kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; background: var(--cream); }
+.progress { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+
+/* ---------- Botones píldora ---------- */
+.pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 50px; padding: 9px 18px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid currentColor; line-height: 1.2; transition: transform .15s ease, background .15s ease; }
+.pill:active { transform: scale(.96); }
+.pill-solid { background: var(--accent); border-color: var(--accent); color: var(--white); }
+.pill-solid:hover { background: var(--green); border-color: var(--green); }
+.pill-dark { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.pill-outline { color: var(--house); background: transparent; }
+.pill-outline:hover { background: rgba(0,98,65,.08); }
+.on-dark .pill-outline { color: var(--white); }
+.on-dark .pill-outline:hover { background: rgba(255,255,255,.1); }
+
+/* ---------- Secciones ---------- */
+.slide { scroll-margin-top: var(--header-h); position: relative; }
+.wrap {
+  max-width: 1200px; margin: 0 auto;
+  padding-block: clamp(4rem, 9vw, 7rem);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 900px) and (min-height: 700px) {
+  .slide { min-height: calc(100vh - var(--header-h)); display: flex; align-items: center; }
+  .slide > .wrap { width: 100%; }
+}
+.bg-mint { background: var(--mint); }
+.bg-cream { background: var(--cream); }
+.bg-house { background: var(--house); color: var(--on-dark); }
+.bg-green { background: var(--green); color: var(--white); }
+
+.eyebrow { font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.eyebrow .n { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 600; }
+.on-dark .eyebrow { color: var(--gold); }
+.on-dark .eyebrow .n { color: var(--on-dark-muted); }
+.h2 { font-size: var(--h2); line-height: 1.08; font-weight: 700; color: var(--house); max-width: 22ch; }
+.on-dark .h2 { color: var(--white); }
+.lead { font-size: var(--lead); color: var(--muted); max-width: 60ch; margin-top: 16px; }
+.on-dark .lead { color: var(--on-dark-muted); }
+.head { margin-bottom: clamp(2rem, 4vw, 3.25rem); }
+
+.big { font-size: var(--num); line-height: 1; font-weight: 700; letter-spacing: -0.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.on-dark .big { color: var(--white); }
+.cap { color: var(--muted); font-size: 15px; }
+.on-dark .cap { color: var(--on-dark-muted); }
+
+.card { background: var(--white); border-radius: 12px; padding: clamp(20px, 2.6vw, 32px); box-shadow: 0 0 .5px rgba(0,0,0,.14), 0 1px 1px rgba(0,0,0,.24); min-width: 0; }
+.on-dark .card { background: var(--deep); box-shadow: none; color: var(--on-dark); }
+.ico { width: 52px; height: 52px; border-radius: 50%; background: var(--mint); color: var(--green); display: grid; place-items: center; flex: none; }
+.ico svg { width: 26px; height: 26px; }
+.on-dark .ico { background: rgba(212,233,226,.14); color: var(--mint); }
+svg.i { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 28px); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 28px); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px); }
+.grid-5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(12px, 1.6vw, 20px); }
+@media (max-width: 1000px) { .grid-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .grid-4, .grid-5 { grid-template-columns: 1fr; } }
+
+/* ---------- Animaciones de entrada (solo se disparan al llegar; en reposo todo es visible) ---------- */
+.play.reveal { animation: rise .8s var(--ease) both; animation-delay: var(--d, 0ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } }
+.play .grow { animation: grow 1.2s var(--ease) both; animation-delay: calc(var(--d, 0ms) + 200ms); transform-origin: left center; }
+@keyframes grow { from { transform: scaleX(0); } }
+.play .draw { animation: draw 1.4s var(--ease) both; animation-delay: calc(var(--d, 0ms) + 250ms); }
+@keyframes draw { from { stroke-dashoffset: 1; } }
+.play .pop { animation: pop .6s var(--ease) both; animation-delay: calc(var(--d, 0ms) + var(--p, 600ms)); transform-box: fill-box; transform-origin: center; }
+@keyframes pop { from { opacity: 0; transform: scale(.3); } }
+.play .fade { animation: fade .8s ease both; animation-delay: calc(var(--d, 0ms) + var(--p, 500ms)); }
+@keyframes fade { from { opacity: 0; } }
+.play .ring { animation: ring 1.5s var(--ease) both; animation-delay: calc(var(--d, 0ms) + 200ms); }
+@keyframes ring { from { stroke-dasharray: 0 999; } }
+.play .steam { animation: steam 2.4s ease-in-out both; }
+@keyframes steam { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Hero ---------- */
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
+.hero h1 { font-size: var(--h1); line-height: 1.02; font-weight: 700; color: var(--green); letter-spacing: -0.03em; }
+.hero .sub { font-size: clamp(1.3rem, 2.4vw, 1.85rem); line-height: 1.25; font-weight: 600; color: var(--house); margin-top: 18px; max-width: 26ch; }
+.hero .lead { color: #3E4F49; }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.hero .team { margin-top: 34px; font-size: 14px; color: #3E4F49; }
+.hero-art { position: relative; justify-self: center; width: min(100%, 460px); }
+.hero-art svg { width: 100%; height: auto; display: block; }
+.hero-stat {
+  position: absolute; right: -4%; bottom: 8%;
+  background: var(--white); border-radius: 14px; padding: 18px 22px; width: min(62%, 250px);
+  box-shadow: 0 8px 24px rgba(30,57,50,.18);
+}
+.hero-stat .big { font-size: clamp(2.6rem, 5vw, 3.6rem); }
+.hero-stat p { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero-art { width: min(100%, 380px); } .hero-stat { right: 0; } }
+
+/* ---------- Diagnóstico ---------- */
+.donut-wrap { display: flex; align-items: center; gap: clamp(18px, 3vw, 36px); flex-wrap: wrap; }
+.donut { position: relative; width: min(240px, 100%); aspect-ratio: 1; flex: none; }
+.donut svg { width: 100%; height: 100%; display: block; }
+.donut .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.donut .center b { font-size: clamp(2.2rem, 4.4vw, 3.2rem); line-height: 1; color: var(--house); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+.donut .center span { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.donut-text { flex: 1; min-width: 220px; }
+.donut-text .big { font-size: clamp(2.4rem, 5vw, 3.8rem); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); margin-top: 14px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.base { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+.base .card { padding: 20px 22px; }
+.base b { display: block; font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.05; color: var(--house); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.base span { font-size: 14px; color: var(--muted); }
+.mix { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+.mix div { height: 100%; }
+@media (max-width: 760px) { .base { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- Canal ---------- */
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { font-family: var(--font); }
+.chart-box { overflow-x: auto; }
+.callout { display: flex; gap: 14px; align-items: flex-start; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+.callout p { font-size: 15px; color: var(--muted); }
+.callout b { color: var(--house); }
+.duo { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.duo .vs { font-size: 18px; color: var(--muted); font-weight: 600; }
+.duo .gray { color: #8A938F; }
+
+/* ---------- Método ---------- */
+.steps { position: relative; }
+.steps-line { position: absolute; left: 6%; right: 6%; top: 58px; height: 2px; background: var(--accent); opacity: .35; }
+.step { position: relative; display: flex; flex-direction: column; gap: 12px; }
+.step .ico { background: var(--accent); color: var(--white); width: 60px; height: 60px; box-shadow: 0 0 0 6px var(--white); }
+.step h3 { font-size: 20px; color: var(--house); }
+.step p { font-size: 15px; color: var(--muted); }
+.step .k { font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--accent); }
+@media (max-width: 1000px) { .steps-line { display: none; } }
+.rule {
+  margin-top: clamp(2rem, 4vw, 3rem); border-radius: 16px; background: var(--house); color: var(--white);
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: clamp(16px, 3vw, 36px); align-items: center; padding: clamp(22px, 3.4vw, 40px);
+}
+.rule .q { font-size: clamp(1.4rem, 2.8vw, 2.2rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+.rule .q small { display: block; font-size: 15px; font-weight: 400; color: var(--on-dark-muted); margin-top: 10px; letter-spacing: 0; line-height: 1.5; }
+.gauge { display: flex; align-items: center; gap: 14px; }
+.gauge svg { width: 92px; height: 92px; flex: none; }
+.gauge p { font-size: 14px; color: var(--on-dark-muted); max-width: 16ch; }
+.gauge b { color: var(--white); font-size: 15px; display: block; }
+@media (max-width: 760px) { .rule { grid-template-columns: 1fr; } }
+
+/* ---------- Segmentos ---------- */
+.seg { display: flex; flex-direction: column; gap: 14px; }
+.seg-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.seg h3 { font-size: 19px; color: var(--house); }
+.seg .share { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.seg .share svg { width: 44px; height: 44px; flex: none; }
+.seg .big { font-size: clamp(2.4rem, 4vw, 3.2rem); }
+.seg .per { font-size: 14px; color: var(--muted); margin-top: -8px; }
+.seg dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 0; font-size: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.seg dt { color: var(--muted); }
+.seg dd { margin: 0; font-weight: 700; color: var(--house); font-variant-numeric: tabular-nums; text-align: right; }
+.seg .strat { font-size: 15px; color: var(--ink); background: var(--cream); border-radius: 10px; padding: 12px 14px; margin-top: auto; }
+.seg .strat b { color: var(--green); }
+.waste { margin-top: clamp(1.6rem, 3vw, 2.4rem); display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(16px, 3vw, 40px); align-items: center; }
+.waste h3 { font-size: clamp(1.3rem, 2.2vw, 1.7rem); color: var(--house); line-height: 1.2; }
+.waste .lead { font-size: 16px; }
+.bars { display: flex; flex-direction: column; gap: 14px; }
+.bar-row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 5.5rem; gap: 12px; align-items: center; font-size: 14px; }
+.bar-row .lbl { color: var(--ink); font-weight: 600; }
+.bar-row .val { text-align: right; font-weight: 700; color: var(--house); font-variant-numeric: tabular-nums; }
+.bar-row .val small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.track { height: 18px; background: var(--cream); border-radius: 9px; overflow: hidden; }
+.fill { height: 100%; background: var(--accent); border-radius: 9px; }
+@media (max-width: 760px) { .waste { grid-template-columns: 1fr; } .bar-row { grid-template-columns: 6.2rem minmax(0, 1fr) 4.8rem; } }
+
+/* ---------- Ofertas (heatmap) ---------- */
+.heat-box { overflow-x: auto; border-radius: 14px; background: var(--deep); padding: clamp(10px, 1.6vw, 18px); }
+.heat { width: 100%; min-width: 620px; border-collapse: separate; border-spacing: 5px; font-variant-numeric: tabular-nums; }
+.heat th { font-size: 13px; font-weight: 600; color: var(--on-dark-muted); text-align: center; padding: 4px 6px; letter-spacing: .02em; }
+.heat th.row { text-align: left; color: var(--on-dark); font-weight: 400; font-size: 14px; white-space: nowrap; padding-right: 12px; }
+.heat th.row .tag { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--house); background: var(--gold); border-radius: 20px; padding: 2px 8px; vertical-align: 1px; }
+.heat td { text-align: center; font-weight: 700; font-size: 15px; border-radius: 6px; padding: 9px 4px; }
+.heat td.best { box-shadow: inset 0 0 0 3px var(--gold); }
+.heat-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin-top: 14px; font-size: 13px; color: var(--on-dark-muted); }
+.scale { display: inline-flex; align-items: center; gap: 8px; }
+.scale i { display: inline-block; width: 120px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #23413A, #D4E9E2); }
+.best-key { display: inline-block; width: 16px; height: 16px; border-radius: 4px; box-shadow: inset 0 0 0 3px var(--gold); vertical-align: -3px; margin-right: 6px; }
+.recs { margin-top: clamp(1.5rem, 3vw, 2.2rem); }
+.rec { display: flex; flex-direction: column; gap: 8px; }
+.rec .who { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.rec .what { font-size: 17px; font-weight: 600; color: var(--white); line-height: 1.3; }
+.rec .big { font-size: clamp(2.2rem, 3.6vw, 2.9rem); color: var(--mint); }
+.rec .how { font-size: 14px; color: var(--on-dark-muted); }
+.rec.out .big { color: var(--on-dark-muted); font-size: clamp(1.7rem, 2.8vw, 2.2rem); }
+
+/* ---------- Operación ---------- */
+.ops { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: clamp(20px, 4vw, 56px); align-items: center; }
+.ops-cards { display: flex; flex-direction: column; gap: 14px; }
+.ops-cards .card { display: flex; gap: 16px; align-items: flex-start; }
+.ops-cards h3 { font-size: 18px; color: var(--house); margin-bottom: 4px; }
+.ops-cards p { font-size: 15px; color: var(--muted); }
+.kpis { margin-top: clamp(1.6rem, 3vw, 2.4rem); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-radius: 14px; overflow: hidden; background: var(--cream); }
+.kpi { padding: clamp(18px, 2.4vw, 28px); border-left: 1px solid var(--line); }
+.kpi:first-child { border-left: 0; }
+.kpi b { display: block; font-size: clamp(2rem, 3.6vw, 2.8rem); line-height: 1.05; color: var(--accent); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpi span { display: block; font-size: 15px; color: var(--ink); margin-top: 6px; }
+.kpi small { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+@media (max-width: 860px) { .ops { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .kpis { grid-template-columns: 1fr; } .kpi { border-left: 0; border-top: 1px solid var(--line); } .kpi:first-child { border-top: 0; } }
+
+/* ---------- Ruta ---------- */
+.timeline { position: relative; }
+.tl-line { position: absolute; left: 0; right: 0; top: 27px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.tl-line div { height: 100%; width: 100%; background: var(--accent); }
+.phase { position: relative; display: flex; flex-direction: column; gap: 12px; }
+.phase .dot { width: 58px; height: 58px; border-radius: 50%; background: var(--white); border: 4px solid var(--accent); display: grid; place-items: center; color: var(--green); }
+.phase .dot svg { width: 24px; height: 24px; }
+.phase .when { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.phase h3 { font-size: clamp(1.3rem, 2.2vw, 1.6rem); color: var(--house); }
+.phase p { font-size: 15px; color: var(--muted); }
+.phase .chip { align-self: flex-start; font-size: 13px; font-weight: 600; color: var(--green); background: var(--mint); border-radius: 20px; padding: 4px 12px; }
+@media (max-width: 760px) { .tl-line { display: none; } }
+
+/* ---------- Cierre ---------- */
+.close .wrap { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.close .quote { font-size: clamp(2rem, 4.8vw, 3.8rem); line-height: 1.08; font-weight: 700; letter-spacing: -0.025em; color: var(--white); max-width: 20ch; }
+.close .quote em { font-style: normal; color: var(--gold); }
+.close .meta { font-size: 15px; color: var(--on-dark-muted); max-width: 60ch; }
+.foot { background: var(--house); color: var(--on-dark-muted); font-size: 13px; border-top: 1px solid rgba(255,255,255,.1); }
+.foot .wrap { padding-block: 22px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+/* ---------- Navegación por puntos ---------- */
+.dots { position: fixed; right: max(18px, calc(env(safe-area-inset-right, 0px) + 18px)); top: 50%; transform: translateY(-50%); z-index: 40; display: flex; flex-direction: column; gap: 12px; }
+.dots a { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); background: var(--white); display: block; position: relative; transition: transform .2s ease, background .2s ease; }
+.dots a[aria-current="true"] { background: var(--accent); transform: scale(1.25); }
+.dots a span { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--white); background: var(--house); border-radius: 6px; padding: 3px 8px; opacity: 0; pointer-events: none; transition: opacity .15s ease; }
+.dots a:hover span, .dots a:focus-visible span { opacity: 1; }
+@media (max-width: 1100px) { .dots { display: none; } }
+@media (max-width: 1080px) { .nav { display: none; } }
+@media (max-width: 640px) { .hint { display: none; } }
+</style>
+<style>body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M11 3v2M14 3v2"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c1.9.7 3.1 2.5 3.5 5.2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 16v-4M11 16V8M16 16v-6M21 16V5"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3"/><path d="M7 15h10"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M20 5H9a5 5 0 0 0-5 5"/><path d="M7 22l-3-3 3-3"/><path d="M4 19h11a5 5 0 0 0 5-5"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#inicio"><span class="brand-mark"><svg class="i"><use href="#i-cup"/></svg></span>Datos que venden</a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#diagnostico">Diagnóstico</a>
+      <a href="#canal">Canal</a>
+      <a href="#metodo">Método</a>
+      <a href="#segmentos">Segmentos</a>
+      <a href="#ofertas">Ofertas</a>
+      <a href="#ruta">Hoja de ruta</a>
+    </nav>
+    <div class="top-right">
+      <span class="hint">Avanza con <kbd>↓</kbd> <kbd>→</kbd></span>
+      <a class="pill pill-dark" href="#cierre">Preguntas</a>
+    </div>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<nav class="dots" aria-label="Diapositivas" id="dots"></nav>
+
+<main>
+
+<!-- 1 · HERO -->
+<section class="slide hero bg-mint" id="inicio" data-label="Inicio">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow reveal">Data Science &amp; Tech para Marketing</p>
+      <h1 class="reveal" style="--d:80ms">Datos que venden.</h1>
+      <p class="sub reveal" style="--d:160ms">Cómo Data Science &amp; Tech impulsa a Marketing.</p>
+      <p class="lead reveal" style="--d:240ms">Del dato a la oferta correcta, para el cliente correcto, por el canal correcto. Caso de estudio del programa de recompensas de Starbucks: 17,000 clientes durante 30 días.</p>
+      <div class="ctas reveal" style="--d:320ms">
+        <a class="pill pill-solid" href="#diagnostico">Ver el hallazgo</a>
+        <a class="pill pill-outline" href="#ruta">Plan a 90 días</a>
+      </div>
+      <p class="team reveal" style="--d:400ms">Equipo: Luis Alfredo Illescas Sánchez · Omar Andrade Cortes· </p>
+    </div>
+    <div class="hero-art reveal" style="--d:200ms">
+      <svg viewBox="0 0 400 440" role="img" aria-label="Ilustración de un vaso de café con una gráfica de barras ascendente en la manga y vapor en forma de flecha hacia arriba">
+        <g class="steam" fill="none" stroke="#00754A" stroke-width="7" stroke-linecap="round">
+          <path d="M160 82c-14-16 14-26 0-44"/>
+          <path d="M200 80c-14-18 14-30 0-52"/>
+          <path d="M240 82c-14-16 14-26 0-44"/>
+        </g>
+        <path d="M90 150h220l-25 250a15 15 0 0 1-15 14H130a15 15 0 0 1-15-14z" fill="#FFFFFF"/>
+        <rect x="104" y="98" width="192" height="30" rx="12" fill="#00754A"/>
+        <rect x="78" y="120" width="244" height="36" rx="14" fill="#1E3932"/>
+        <path d="M101 246h198l-8 86H109z" fill="#CBA258"/>
+        <g fill="#1E3932">
+          <rect class="grow-v" x="140" y="300" width="22" height="20" rx="3"/>
+          <rect class="grow-v" x="172" y="286" width="22" height="34" rx="3"/>
+          <rect class="grow-v" x="204" y="272" width="22" height="48" rx="3"/>
+          <rect class="grow-v" x="236" y="258" width="22" height="62" rx="3"/>
+        </g>
+        <path class="draw" pathLength="1" style="stroke-dasharray:1" d="M146 292 L183 278 L215 264 L252 248" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+        <circle class="pop" style="--p:1300ms" cx="252" cy="248" r="7" fill="#FFFFFF"/>
+      </svg>
+      <div class="hero-stat">
+        <div class="big" data-count="31" data-suffix=" %">31 %</div>
+        <p>de cada dólar en recompensas se pagó a clientes que nunca vieron la oferta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · DIAGNÓSTICO -->
+<section class="slide" id="diagnostico" data-label="Diagnóstico">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">01</span> Diagnóstico</p>
+      <h2 class="h2 reveal" style="--d:80ms">Marketing está pagando por compras que iban a ocurrir.</h2>
+      <p class="lead reveal" style="--d:160ms">Una oferta solo puede influir si el cliente la vio antes de comprar. Casi un tercio de las recompensas se pagó sin que eso pasara.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card reveal" style="--d:200ms">
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 220 220" aria-hidden="true">
+              <circle cx="110" cy="110" r="84" fill="none" stroke="#D4E9E2" stroke-width="26"/>
+              <circle class="ring" cx="110" cy="110" r="84" fill="none" stroke="#00754A" stroke-width="26" stroke-dasharray="163.6 527.8" transform="rotate(-90 110 110)"/>
+            </svg>
+            <div class="center"><b data-count="31" data-suffix=" %">31 %</b><span>sin influencia</span></div>
+          </div>
+          <div class="donut-text">
+            <p class="cap">Recompensas pagadas sin influencia</p>
+            <div class="big" data-count="42655" data-prefix="USD ">USD 42,655</div>
+            <p class="cap" style="margin-top:8px">de <b style="color:var(--house)">USD 138,085</b> pagados en recompensas durante el periodo.</p>
+            <div class="legend"><span><i style="background:#00754A"></i>Sin haber visto la oferta</span><span><i style="background:#D4E9E2"></i>Con la oferta vista</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card reveal" style="--d:300ms">
+        <p class="cap">Visibilidad de la oferta</p>
+        <div class="duo" style="margin-top:6px">
+          <span class="big" data-count="9" data-suffix=" de 10">9 de 10</span>
+        </div>
+        <p class="cap" style="margin-top:8px">clientes ven la oferta cuando incluye redes sociales. Sin redes, menos de la mitad.</p>
+        <div class="bars" style="margin-top:22px">
+          <div class="bar-row"><span class="lbl">Con redes</span><div class="track"><div class="fill grow" style="width:91%"></div></div><span class="val" data-count="91" data-suffix=" %">91 %</span></div>
+          <div class="bar-row"><span class="lbl">Sin redes</span><div class="track"><div class="fill grow" style="width:47%;background:#8A938F"></div></div><span class="val" data-count="47" data-suffix=" %">47 %</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="base">
+      <div class="card reveal" style="--d:380ms"><b data-count="17000">17,000</b><span>clientes</span></div>
+      <div class="card reveal" style="--d:440ms"><b data-count="76277">76,277</b><span>ofertas enviadas</span></div>
+      <div class="card reveal" style="--d:500ms"><b data-count="306534">306,534</b><span>eventos en 30 días</span></div>
+      <div class="card reveal" style="--d:560ms">
+        <span>Mezcla de ofertas, igual en todos los segmentos</span>
+        <div class="mix" aria-hidden="true"><div class="grow" style="width:40%;background:#1E3932"></div><div class="grow" style="width:40%;background:#00754A"></div><div class="grow" style="width:20%;background:#CBA258"></div></div>
+        <span style="font-size:13px">40 % 2x1 · 40 % descuento · 20 % informativa</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · CANAL -->
+<section class="slide bg-cream" id="canal" data-label="Canal">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">02</span> El canal importa</p>
+      <h2 class="h2 reveal" style="--d:80ms">Con redes sociales, la oferta se ve en todos los segmentos.</h2>
+      <p class="lead reveal" style="--d:160ms">El mismo incentivo rinde casi el doble cuando llega por redes. No es cuestión de enviar más ofertas: es de que lleguen.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card reveal" style="--d:200ms">
+        <p class="cap" style="margin-bottom:6px">Clientes que ven la oferta, por segmento</p>
+        <div class="legend" style="margin:0 0 6px"><span><i style="background:#8A938F;border-radius:50%"></i>Sin redes</span><span><i style="background:#00754A;border-radius:50%"></i>Con redes</span></div>
+        <div class="chart-box">
+          <svg class="chart" viewBox="0 0 560 260" role="img" aria-label="Tasa de vista sin y con redes sociales: Frecuentes 42 y 93 por ciento; Ticket alto 58 y 90; Ticket chico 33 y 93; Inactivos 48 y 90.">
+            <g stroke="#DAD7CF" stroke-width="1">
+              <line x1="150" y1="20" x2="150" y2="228"/><line x1="340" y1="20" x2="340" y2="228"/><line x1="530" y1="20" x2="530" y2="228"/>
+            </g>
+            <g font-size="13" fill="#5B5B57" text-anchor="middle">
+              <text x="150" y="250">0 %</text><text x="340" y="250">50 %</text><text x="530" y="250">100 %</text>
+            </g>
+            <g font-size="15" font-weight="600" fill="#1E3932">
+              <text x="0" y="45">Frecuentes</text><text x="0" y="100">Ticket alto</text><text x="0" y="155">Ticket chico</text><text x="0" y="210">Inactivos</text>
+            </g>
+            <g stroke="#00754A" stroke-width="5" stroke-linecap="round" opacity=".35">
+              <line class="draw" pathLength="1" style="stroke-dasharray:1" x1="309.6" y1="40" x2="503.4" y2="40"/>
+              <line class="draw" pathLength="1" style="stroke-dasharray:1" x1="370.4" y1="95" x2="492" y2="95"/>
+              <line class="draw" pathLength="1" style="stroke-dasharray:1" x1="275.4" y1="150" x2="503.4" y2="150"/>
+              <line class="draw" pathLength="1" style="stroke-dasharray:1" x1="332.4" y1="205" x2="492" y2="205"/>
+            </g>
+            <g fill="#8A938F">
+              <circle class="pop" style="--p:300ms" cx="309.6" cy="40" r="9"/><circle class="pop" style="--p:350ms" cx="370.4" cy="95" r="9"/><circle class="pop" style="--p:400ms" cx="275.4" cy="150" r="9"/><circle class="pop" style="--p:450ms" cx="332.4" cy="205" r="9"/>
+            </g>
+            <g fill="#00754A">
+              <circle class="pop" style="--p:1300ms" cx="503.4" cy="40" r="10"/><circle class="pop" style="--p:1350ms" cx="492" cy="95" r="10"/><circle class="pop" style="--p:1400ms" cx="503.4" cy="150" r="10"/><circle class="pop" style="--p:1450ms" cx="492" cy="205" r="10"/>
+            </g>
+            <g font-size="13" font-weight="700" fill="#5B5B57" text-anchor="end">
+              <text x="295" y="27">42 %</text><text x="356" y="82">58 %</text><text x="261" y="137">33 %</text><text x="318" y="192">48 %</text>
+            </g>
+            <g class="fade" style="--p:1500ms" font-size="13" font-weight="700" fill="#00754A" text-anchor="middle">
+              <text x="503.4" y="24">93 %</text><text x="492" y="79">90 %</text><text x="503.4" y="134">93 %</text><text x="492" y="189">90 %</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="card reveal" style="--d:300ms">
+        <p class="cap" style="margin-bottom:6px">Misma oferta, distinto canal · tasa de éxito en Ticket alto</p>
+        <div class="chart-box">
+          <svg class="chart" viewBox="0 0 600 300" role="img" aria-label="Tasa de éxito en Ticket alto: descuento gasta 10 recibe 2 pasa de 41 por ciento sin redes a 74 por ciento con redes; 2x1 de 5 dólares pasa de 43 a 63 por ciento.">
+            <g font-size="14" font-weight="600" fill="#5B5B57" text-anchor="middle"><text x="110" y="22">Sin redes</text><text x="330" y="22">Con redes</text></g>
+            <g stroke="#DAD7CF"><line x1="110" y1="36" x2="110" y2="282"/><line x1="330" y1="36" x2="330" y2="282"/></g>
+            <line class="draw" pathLength="1" style="stroke-dasharray:1" x1="110" y1="147" x2="330" y2="48" stroke="#00754A" stroke-width="5" stroke-linecap="round"/>
+            <line class="draw" pathLength="1" style="stroke-dasharray:1;--d:150ms" x1="110" y1="141" x2="330" y2="81" stroke="#1E3932" stroke-width="5" stroke-linecap="round"/>
+            <circle class="pop" style="--p:300ms" cx="110" cy="147" r="8" fill="#00754A"/>
+            <circle class="pop" style="--p:350ms" cx="110" cy="141" r="8" fill="#1E3932"/>
+            <circle class="pop" style="--p:1300ms" cx="330" cy="48" r="9" fill="#00754A"/>
+            <circle class="pop" style="--p:1400ms" cx="330" cy="81" r="9" fill="#1E3932"/>
+            <g font-size="15" font-weight="700" text-anchor="end"><text x="96" y="162" fill="#00754A">41 %</text><text x="96" y="137" fill="#1E3932">43 %</text></g>
+            <g class="fade" style="--p:1500ms" font-size="15">
+              <text x="346" y="53" fill="#00754A" font-weight="700">74 %<tspan font-weight="400" fill="#5B5B57"> descuento: gasta 10, recibe 2</tspan></text>
+              <text x="346" y="86" fill="#1E3932" font-weight="700">63 %<tspan font-weight="400" fill="#5B5B57"> 2x1 de USD 5</tspan></text>
+            </g>
+          </svg>
+        </div>
+        <div class="callout">
+          <span class="ico"><svg class="i"><use href="#i-phone"/></svg></span>
+          <p><b>Misma meta, misma recompensa.</b> Las ofertas gemelas solo cambian el canal y la vigencia, y la versión con redes sociales gana por 20 a 33 puntos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · MÉTODO -->
+<section class="slide" id="metodo" data-label="Método">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">03</span> Metodología</p>
+      <h2 class="h2 reveal" style="--d:80ms">Data Science convirtió datos en decisiones accionables.</h2>
+      <p class="lead reveal" style="--d:160ms">Cinco pasos, de tres tablas sueltas a un tablero que Marketing puede usar cada semana.</p>
+    </div>
+    <div class="steps">
+      <div class="steps-line grow reveal" style="--d:200ms"></div>
+      <div class="grid-5">
+        <div class="step reveal" style="--d:200ms"><span class="ico"><svg class="i"><use href="#i-db"/></svg></span><span class="k">PASO 1</span><h3>Integrar</h3><p>Unificar clientes, ofertas y transacciones en una sola vista.</p></div>
+        <div class="step reveal" style="--d:300ms"><span class="ico"><svg class="i"><use href="#i-spark"/></svg></span><span class="k">PASO 2</span><h3>Limpiar</h3><p>Depurar el 12.8 % de perfiles sin demografía y resolver duplicados.</p></div>
+        <div class="step reveal" style="--d:400ms"><span class="ico"><svg class="i"><use href="#i-eye"/></svg></span><span class="k">PASO 3</span><h3>Atribuir</h3><p>Contar la venta solo si el cliente vio la oferta antes de pagar.</p></div>
+        <div class="step reveal" style="--d:500ms"><span class="ico"><svg class="i"><use href="#i-users"/></svg></span><span class="k">PASO 4</span><h3>Segmentar</h3><p>Cuatro grupos cada semana con aprendizaje automático.</p></div>
+        <div class="step reveal" style="--d:600ms"><span class="ico"><svg class="i"><use href="#i-chart"/></svg></span><span class="k">PASO 5</span><h3>Entregar</h3><p>Tablero por segmento, oferta y canal para Marketing.</p></div>
+      </div>
+    </div>
+    <div class="rule reveal" style="--d:300ms">
+      <span class="ico" style="width:64px;height:64px"><svg class="i" style="width:30px;height:30px"><use href="#i-eye"/></svg></span>
+      <p class="q">Si no la vio, no influyó.<small>Regla de negocio: si el cliente no vio la oferta antes de comprar, la oferta no pudo influir en su compra.</small></p>
+      <div class="gauge">
+        <svg viewBox="0 0 92 92" aria-hidden="true">
+          <circle cx="46" cy="46" r="36" fill="none" stroke="rgba(212,233,226,.2)" stroke-width="10"/>
+          <circle class="ring" cx="46" cy="46" r="36" fill="none" stroke="#CBA258" stroke-width="10" stroke-linecap="round" stroke-dasharray="185.5 226.2" transform="rotate(-90 46 46)"/>
+          <text x="46" y="52" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF" font-family="Helvetica Neue, Arial, sans-serif">82 %</text>
+        </svg>
+        <p><b>Segmentos validados</b>con un segundo modelo: 82 % de coincidencia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · SEGMENTOS -->
+<section class="slide bg-cream" id="segmentos" data-label="Segmentos">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">04</span> Segmentación de clientes</p>
+      <h2 class="h2 reveal" style="--d:80ms">Cuatro tipos de cliente, cuatro estrategias.</h2>
+      <p class="lead reveal" style="--d:160ms">Gasto promedio por semana. Cada grupo compra distinto y responde a incentivos distintos.</p>
+    </div>
+    <div class="grid-4">
+      <article class="card seg reveal" style="--d:200ms">
+        <div class="seg-top"><span class="ico"><svg class="i"><use href="#i-repeat"/></svg></span>
+          <span class="share"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="#D4E9E2" stroke-width="6"/><circle class="ring" cx="22" cy="22" r="17" fill="none" stroke="#00754A" stroke-width="6" stroke-dasharray="15.4 106.8" transform="rotate(-90 22 22)"/></svg>14 % de clientes</span></div>
+        <h3>Frecuentes</h3>
+        <div class="big" data-count="57" data-prefix="USD ">USD 57</div>
+        <p class="per">por semana</p>
+        <dl><dt>Visitas por semana</dt><dd>5</dd><dt>Ofertas exitosas</dt><dd>46.5 %</dd></dl>
+        <p class="strat"><b>Estrategia:</b> retener sin saturar con promociones innecesarias.</p>
+      </article>
+      <article class="card seg reveal" style="--d:300ms">
+        <div class="seg-top"><span class="ico"><svg class="i"><use href="#i-bag"/></svg></span>
+          <span class="share"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="#D4E9E2" stroke-width="6"/><circle class="ring" cx="22" cy="22" r="17" fill="none" stroke="#00754A" stroke-width="6" stroke-dasharray="38.0 106.8" transform="rotate(-90 22 22)"/></svg>36 % de clientes</span></div>
+        <h3>Ticket alto</h3>
+        <div class="big" data-count="40" data-prefix="USD ">USD 40</div>
+        <p class="per">por semana</p>
+        <dl><dt>Visitas · ticket</dt><dd>2 · USD 23</dd><dt>Ofertas exitosas</dt><dd>52.2 %</dd></dl>
+        <p class="strat"><b>Estrategia:</b> lograr una visita adicional por semana.</p>
+      </article>
+      <article class="card seg reveal" style="--d:400ms">
+        <div class="seg-top"><span class="ico"><svg class="i"><use href="#i-cup"/></svg></span>
+          <span class="share"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="#D4E9E2" stroke-width="6"/><circle class="ring" cx="22" cy="22" r="17" fill="none" stroke="#00754A" stroke-width="6" stroke-dasharray="26.3 106.8" transform="rotate(-90 22 22)"/></svg>25 % de clientes</span></div>
+        <h3>Ticket chico</h3>
+        <div class="big" data-count="6" data-prefix="USD ">USD 6</div>
+        <p class="per">por semana</p>
+        <dl><dt>Visitas · ticket</dt><dd>2 · USD 3</dd><dt>Ofertas exitosas</dt><dd>25.4 %</dd></dl>
+        <p class="strat"><b>Estrategia:</b> subir el ticket con venta cruzada.</p>
+      </article>
+      <article class="card seg reveal" style="--d:500ms">
+        <div class="seg-top"><span class="ico"><svg class="i"><use href="#i-moon"/></svg></span>
+          <span class="share"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="#D4E9E2" stroke-width="6"/><circle class="ring" cx="22" cy="22" r="17" fill="none" stroke="#00754A" stroke-width="6" stroke-dasharray="27.1 106.8" transform="rotate(-90 22 22)"/></svg>25 % de clientes</span></div>
+        <h3>Inactivos</h3>
+        <div class="big" data-count="0" data-prefix="USD ">USD 0</div>
+        <p class="per">esa semana</p>
+        <dl><dt>Vuelven a comprar</dt><dd>2 de cada 3</dd><dt>Ofertas exitosas</dt><dd>28.5 %</dd></dl>
+        <p class="strat"><b>Estrategia:</b> reactivar a tiempo con un incentivo medido.</p>
+      </article>
+    </div>
+    <div class="waste">
+      <div class="reveal" style="--d:200ms">
+        <h3>¿Dónde se pagan las recompensas sin influencia?</h3>
+        <p class="lead">En los cuatro segmentos ronda el 30 %. No es un problema de un grupo: es del sistema. Ticket alto concentra la mitad del monto porque su ticket alcanza la meta sin proponérselo.</p>
+      </div>
+      <div class="card bars reveal" style="--d:300ms">
+        <div class="bar-row"><span class="lbl">Ticket alto</span><div class="track"><div class="fill grow" style="width:100%"></div></div><span class="val">USD 21,791<small>30.7 % de lo pagado</small></span></div>
+        <div class="bar-row"><span class="lbl">Inactivos</span><div class="track"><div class="fill grow" style="width:40.5%;--d:100ms"></div></div><span class="val">USD 8,824<small>31.8 %</small></span></div>
+        <div class="bar-row"><span class="lbl">Frecuentes</span><div class="track"><div class="fill grow" style="width:36.6%;--d:200ms"></div></div><span class="val">USD 7,978<small>32.6 %</small></span></div>
+        <div class="bar-row"><span class="lbl">Ticket chico</span><div class="track"><div class="fill grow" style="width:18.6%;--d:300ms"></div></div><span class="val">USD 4,062<small>27.0 %</small></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · OFERTAS -->
+<section class="slide bg-house on-dark" id="ofertas" data-label="Ofertas">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">05</span> Motor de personalización</p>
+      <h2 class="h2 reveal" style="--d:80ms">La siguiente mejor oferta depende del segmento.</h2>
+      <p class="lead reveal" style="--d:160ms">Tasa de éxito de cada oferta por segmento. La misma promoción va de 74 % en un grupo a 4 % en otro.</p>
+    </div>
+    <div class="heat-box reveal" style="--d:200ms">
+      <table class="heat" id="heat">
+        <caption class="sr">Tasa de éxito por oferta y segmento</caption>
+        <thead><tr><th></th><th scope="col">Frecuentes</th><th scope="col">Ticket alto</th><th scope="col">Ticket chico</th><th scope="col">Inactivos</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="heat-legend reveal" style="--d:260ms">
+      <span class="scale">0 % <i></i> 74 %</span>
+      <span><span class="best-key"></span>Mejor oferta del segmento</span>
+    </div>
+    <div class="grid-4 recs">
+      <div class="card rec reveal" style="--d:300ms"><span class="who">Frecuentes y Ticket alto</span><span class="what">Gasta USD 10, recibe USD 2</span><span class="big" data-count="74" data-suffix=" %">74 %</span><span class="how">Activar en la app antes de usar</span></div>
+      <div class="card rec reveal" style="--d:380ms"><span class="who">Ticket chico</span><span class="what">Informativa de 3 días: novedades y menú</span><span class="big" data-count="56" data-suffix=" %">56 %</span><span class="how">Redes sociales + móvil</span></div>
+      <div class="card rec reveal" style="--d:460ms"><span class="who">Inactivos</span><span class="what">Gasta USD 10, recibe USD 2</span><span class="big" data-count="46" data-suffix=" %">46 %</span><span class="how">Disparador puntual</span></div>
+      <div class="card rec out reveal" style="--d:540ms"><span class="who">Todos los segmentos</span><span class="what">Gasta USD 20, recibe USD 5</span><span class="big">4 % a 28 %</span><span class="how">Promoción riesgosa: retirar</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · OPERACIÓN -->
+<section class="slide" id="operacion" data-label="Operación">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">06</span> Gobernanza y ejecución</p>
+      <h2 class="h2 reveal" style="--d:80ms">Marketing + Data Science &amp; Tech: una operación compartida.</h2>
+    </div>
+    <div class="ops">
+      <div class="reveal" style="--d:160ms">
+        <svg class="chart" viewBox="0 0 360 330" role="img" aria-label="Ciclo de trabajo: Marketing define, Data Science segmenta y elige la oferta, Tech ejecuta y mide, y el ciclo vuelve a Marketing.">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#00754A"/></marker></defs>
+          <g fill="none" stroke="#00754A" stroke-width="3" marker-end="url(#ah)">
+            <path class="draw" pathLength="1" style="stroke-dasharray:1" d="M222 70 Q306 116 298 200"/>
+            <path class="draw" pathLength="1" style="stroke-dasharray:1;--d:200ms" d="M252 278 Q180 310 108 278"/>
+            <path class="draw" pathLength="1" style="stroke-dasharray:1;--d:400ms" d="M62 200 Q54 116 138 70"/>
+          </g>
+          <circle class="pop" style="--p:200ms" cx="180" cy="56" r="46" fill="#1E3932"/>
+          <circle class="pop" style="--p:400ms" cx="296" cy="250" r="46" fill="#00754A"/>
+          <circle class="pop" style="--p:600ms" cx="64" cy="250" r="46" fill="#006241"/>
+          <g class="fade" style="--p:700ms" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">
+            <text x="180" y="61">Marketing</text>
+            <text x="296" y="246">Data</text><text x="296" y="263">Science</text>
+            <text x="64" y="255">Tech</text>
+          </g>
+          <g class="fade" style="--p:900ms" text-anchor="middle">
+            <text x="180" y="170" font-size="15" font-weight="700" fill="#1E3932">Medir y</text>
+            <text x="180" y="189" font-size="15" font-weight="700" fill="#1E3932">aprender</text>
+          </g>
+        </svg>
+      </div>
+      <div class="ops-cards">
+        <div class="card reveal" style="--d:200ms"><span class="ico"><svg class="i"><use href="#i-bulb"/></svg></span><div><h3>Marketing</h3><p>Define objetivos de negocio, piezas creativas, mensajes y presupuesto comercial.</p></div></div>
+        <div class="card reveal" style="--d:300ms"><span class="ico"><svg class="i"><use href="#i-chart"/></svg></span><div><h3>Data Science</h3><p>Genera los segmentos semanales, elige la oferta óptima y gestiona pilotos A/B con 10 % de control.</p></div></div>
+        <div class="card reveal" style="--d:400ms"><span class="ico"><svg class="i"><use href="#i-cpu"/></svg></span><div><h3>Tech</h3><p>Garantiza el pipeline diario de datos, la integración app móvil + CRM y el monitoreo del sistema.</p></div></div>
+      </div>
+    </div>
+    <div class="kpis reveal" style="--d:300ms">
+      <div class="kpi"><b>Éxito</b><span>Tasa de ofertas exitosas por segmento</span><small>KPI compartido</small></div>
+      <div class="kpi"><b>&lt; 20 %</b><span>Compras sin influencia</span><small>Hoy: 31 %</small></div>
+      <div class="kpi"><b data-count="10" data-suffix=" %">10 %</b><span>Grupo de control</span><small>Para medir ventas incrementales</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · RUTA -->
+<section class="slide bg-cream" id="ruta" data-label="Hoja de ruta">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow reveal"><span class="n">07</span> Hoja de ruta</p>
+      <h2 class="h2 reveal" style="--d:80ms">En 90 días: dejar de premiar compras inevitables.</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-line reveal" style="--d:150ms"><div class="grow"></div></div>
+      <div class="grid-3">
+        <div class="phase reveal" style="--d:200ms">
+          <span class="dot"><svg class="i"><use href="#i-shield"/></svg></span>
+          <span class="when">Días 1–30</span><h3>Contención</h3>
+          <p>Activar para usar, redes sociales en el 100 % de las ofertas y retirar la oferta de gastar USD 20 y recibir USD 5.</p>
+          <span class="chip">Hasta USD 42,655 recuperables</span>
+        </div>
+        <div class="phase reveal" style="--d:350ms">
+          <span class="dot"><svg class="i"><use href="#i-flask"/></svg></span>
+          <span class="when">Días 31–60</span><h3>Experimentación</h3>
+          <p>Pilotos A/B: cada segmento recibe su oferta ganadora y se compara contra un grupo de control.</p>
+          <span class="chip">Ventas incrementales medidas</span>
+        </div>
+        <div class="phase reveal" style="--d:500ms">
+          <span class="dot"><svg class="i"><use href="#i-cpu"/></svg></span>
+          <span class="when">Días 61–90</span><h3>Automatización</h3>
+          <p>Recomendador en producción que predice qué estímulo cambia la conducta de cada cliente.</p>
+          <span class="chip">Oferta correcta, cada semana</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · CIERRE -->
+<section class="slide close bg-green on-dark" id="cierre" data-label="Cierre">
+  <div class="wrap">
+    <span class="ico reveal" style="width:64px;height:64px"><svg class="i" style="width:30px;height:30px"><use href="#i-target"/></svg></span>
+    <p class="quote reveal" style="--d:100ms">Dejemos de premiar compras que iban a ocurrir y empecemos a premiar <em>las que podemos provocar.</em></p>
+    <a class="pill pill-outline reveal" style="--d:220ms" href="#inicio">¿Preguntas?</a>
+    <p class="meta reveal" style="--d:300ms">Equipo: Luis Alfredo Illescas Sánchez · [Integrante 2] · [Integrante 3]</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Caso de estudio académico · Diplomado en Ciencia de Datos, FES Acatlán (UNAM).</span>
+    <span>Datos simulados del programa de recompensas. Página no oficial, sin afiliación con Starbucks.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+
+  /* Heatmap de ofertas */
+  var offers = [
+    ['Descuento · gasta 10, recibe 2 · 10 días', [74, 74, 45, 46]],
+    ['Descuento · gasta 7, recibe 3', [68, 72, 46, 43]],
+    ['2x1 de USD 5 · 5 días', [60, 63, 30, 33]],
+    ['Informativa · 3 días', [65, 47, 56, 37]],
+    ['2x1 de USD 10 · 5 días', [42, 61, 10, 26]],
+    ['2x1 de USD 10 · 7 días', [43, 53, 12, 23]],
+    ['Informativa · 4 días', [36, 40, 24, 23]],
+    ['Descuento · gasta 10, recibe 2 · 7 días', [33, 41, 14, 20]],
+    ['2x1 de USD 5 · 7 días', [28, 43, 14, 20]],
+    ['Descuento · gasta 20, recibe 5', [16, 28, 4, 12], 'Retirar']
+  ];
+  var best = [0, 1, 2, 3].map(function (c) { return Math.max.apply(null, offers.map(function (o) { return o[1][c]; })); });
+  var lo = [35, 65, 58], hi = [212, 233, 226];
+  var tbody = document.querySelector('#heat tbody');
+  offers.forEach(function (o, r) {
+    var tr = document.createElement('tr');
+    var th = document.createElement('th');
+    th.className = 'row'; th.scope = 'row'; th.textContent = o[0];
+    if (o[2]) { var t = document.createElement('span'); t.className = 'tag'; t.textContent = o[2]; th.appendChild(t); }
+    tr.appendChild(th);
+    o[1].forEach(function (v, c) {
+      var td = document.createElement('td');
+      var k = Math.min(v / 74, 1);
+      var rgb = lo.map(function (a, i) { return Math.round(a + (hi[i] - a) * k); });
+      td.style.background = 'rgb(' + rgb.join(',') + ')';
+      td.style.color = k > 0.45 ? '#1E3932' : '#FFFFFF';
+      td.textContent = v + ' %';
+      if (v === best[c]) { td.className = 'best'; td.title = 'Mejor oferta del segmento'; }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  /* Conteo animado de cifras (en reposo ya muestran su valor final) */
+  function countUp(el) {
+    var end = parseFloat(el.getAttribute('data-count'));
+    var pre = el.getAttribute('data-prefix') || '', suf = el.getAttribute('data-suffix') || '';
+    if (reduce || !isFinite(end) || end === 0) return;
+    var dur = 1300, t0 = null;
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + fmt(end * e) + suf;
+      if (p < 1) requestAnimationFrame(step); else el.textContent = pre + fmt(end) + suf;
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* Entradas al hacer scroll: se disparan un poco antes de que el bloque entre en pantalla */
+  if (!reduce && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        el.classList.add('play');
+        if (el.hasAttribute('data-count')) countUp(el);
+        el.querySelectorAll('[data-count]').forEach(countUp);
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px 12% 0px', threshold: 0 });
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    document.querySelectorAll('.hero-art svg').forEach(function (el) { el.classList.add('play'); });
+  }
+
+  /* Navegación: puntos, enlaces activos, barra de progreso y teclado */
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots = document.getElementById('dots');
+  slides.forEach(function (s) {
+    var a = document.createElement('a');
+    a.href = '#' + s.id;
+    a.innerHTML = '<span>' + s.getAttribute('data-label') + '</span>';
+    a.setAttribute('aria-label', s.getAttribute('data-label'));
+    dots.appendChild(a);
+  });
+  var dotLinks = dots.querySelectorAll('a');
+  var navLinks = document.querySelectorAll('.nav a');
+  function setActive(id) {
+    dotLinks.forEach(function (a) { a.setAttribute('aria-current', a.getAttribute('href') === '#' + id ? 'true' : 'false'); });
+    navLinks.forEach(function (a) { a.setAttribute('aria-current', a.getAttribute('href') === '#' + id ? 'true' : 'false'); });
+  }
+  function current() {
+    var y = window.scrollY + window.innerHeight * 0.35, idx = 0;
+    slides.forEach(function (s, i) { if (s.offsetTop <= y) idx = i; });
+    return idx;
+  }
+  var bar = document.getElementById('progress');
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(window.scrollY / max, 1) : 0) + ')';
+    setActive(slides[current()].id);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    var next = ['ArrowDown', 'ArrowRight', 'PageDown'].indexOf(e.key) > -1;
+    var prev = ['ArrowUp', 'ArrowLeft', 'PageUp'].indexOf(e.key) > -1;
+    if (!next && !prev) return;
+    e.preventDefault();
+    var i = current() + (next ? 1 : -1);
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    slides[i].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  });
+})();
+</script>
+
+</body>
+</html>
